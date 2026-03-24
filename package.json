@@ -12,7 +12,9 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
-    "@hocuspocus/server": "^3.4.4"
+    "@hocuspocus/extension-database": "^3.4.4",
+    "@hocuspocus/server": "^3.4.4",
+    "@supabase/supabase-js": "^2.100.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
