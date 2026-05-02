@@ -11,15 +11,56 @@ import Document from "@tiptap/extension-document"
 import Text from "@tiptap/extension-text"
 import Paragraph from "@tiptap/extension-paragraph";
 
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Strike from "@tiptap/extension-strike";
+import { TextStyle, Color } from "@tiptap/extension-text-style";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import FontSize from "@tiptap/extension-font-size";
+import { FontFamily } from "@tiptap/extension-text-style";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import Image from '@tiptap/extension-image';
+
+import { generateHTML, generateJSON } from "@tiptap/html/server";
+
 const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const extensions = [
+    StarterKit.configure({
+        bold: false,
+        italic: false,
+        strike: false,
+        bulletList: false,
+        orderedList: false,
+        undoRedo: false,
+    }),
+    Bold,
+    Italic,
+    Strike,
+    TextStyle,
+    Color.configure({ types: ["textStyle"] }),
+    FontSize.configure({ types: ["textStyle"] }),
+    FontFamily,
+    Highlight,
+    TextAlign.configure({ types: ["heading", "paragraph"] }),
+    BulletList,
+    OrderedList,
+    ListItem,
+    Image,
+    CodeBlockLowlight
+];
+
 const server = new Server({
     port: 1234,
 
-    async onLoadDocument({ documentName }) {
+    async onLoadDocument({ documentName, document }) {
         console.log("Loading doc:", documentName);
 
         const { data } = await supabase
@@ -33,33 +74,33 @@ const server = new Server({
         if (!data?.note?.content) return ydoc;
 
         try {
-            const json = {
-                type: "doc",
-                content: [
-                    {
-                        type: "paragraph",
-                        content: [
-                            {
-                                type: "text",
-                                text: data.note.content.replace(/<[^>]*>/g, ""), // simple strip (safe fallback)
-                            },
-                        ],
-                    },
-                ],
-            }
+            const json = generateJSON(data.note.content, extensions as any);
 
-            console.log("Seeding from Supabase:", json);
+            console.log("Seeding from Supabase:", JSON.stringify(json, null, 2));
 
-            return TiptapTransformer.toYdoc(
-                json,
-                "default",
-                [Document, Paragraph, Text] as any
-            );
+            return TiptapTransformer.toYdoc(json, "default", extensions as any);
         } catch (e) {
-            console.log("⚠️ fallback empty doc", e)
-            return ydoc
+            console.error("⚠️ fallback empty doc", e);
+            return document;
         }
-    }
+    },
+
+    // Save back to Supabase when document changes
+    // async onStoreDocument({ documentName, document }) {
+    //     try {
+    //         const json = TiptapTransformer.fromYdoc(document, "default");
+    //         const html = generateHTML(json, extensions as any);
+
+    //         await supabase
+    //             .from("notes")
+    //             .update({ note: { content: html } })  // adjust to match your schema shape
+    //             .eq("id", documentName);
+
+    //         console.log("✅ Saved to Supabase:", documentName);
+    //     } catch (e) {
+    //         console.error("⚠️ Failed to save", e);
+    //     }
+    // },
 });
 
 server.listen();
