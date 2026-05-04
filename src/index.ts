@@ -40,6 +40,8 @@ const extensions = [
         bulletList: false,
         orderedList: false,
         undoRedo: false,
+        listItem: false,
+        codeBlock: false,
     }),
     Bold,
     Italic,
