@@ -24,6 +24,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Image from '@tiptap/extension-image';
+import { ListItemWithStyle } from "./ListItemWithStyle";
 
 import { generateHTML, generateJSON } from "@tiptap/html/server";
 
@@ -54,7 +55,7 @@ const extensions = [
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     BulletList,
     OrderedList,
-    ListItem,
+    ListItemWithStyle,
     Image,
     CodeBlockLowlight
 ];
