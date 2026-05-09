@@ -56,7 +56,12 @@ const extensions = [
     BulletList,
     OrderedList,
     ListItemWithStyle,
-    Image,
+    Image.configure({
+        resize: {
+            enabled: true,
+            alwaysPreserveAspectRatio: true,
+        },
+    }),
     CodeBlockLowlight
 ];
 
@@ -66,11 +71,13 @@ const server = new Server({
     async onLoadDocument({ documentName, document }) {
         console.log("Loading doc:", documentName);
 
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from("notes")
             .select("note")
             .eq("id", documentName)
-            .single();
+            .maybeSingle();
+
+        if (error) console.error(error);
 
         const ydoc = new Y.Doc();
 
