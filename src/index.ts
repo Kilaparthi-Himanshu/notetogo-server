@@ -25,6 +25,7 @@ import ListItem from "@tiptap/extension-list-item";
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Image from '@tiptap/extension-image';
 import { ListItemWithStyle } from "./ListItemWithStyle";
+import { Markdown } from "@tiptap/markdown";
 
 import { generateHTML, generateJSON } from "@tiptap/html/server";
 
@@ -44,6 +45,7 @@ const extensions = [
         listItem: false,
         codeBlock: false,
     }),
+    Markdown,
     Bold,
     Italic,
     Strike,
