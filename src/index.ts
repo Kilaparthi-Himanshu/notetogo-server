@@ -71,15 +71,18 @@ const server = new Server({
     port: 1234,
 
     async onLoadDocument({ documentName, document }) {
-        console.log("Loading doc:", documentName);
-
         const { data, error } = await supabase
             .from("notes")
             .select("note")
             .eq("id", documentName)
             .maybeSingle();
 
-        if (error) console.error(error);
+        if (error) {
+            console.error("Failed to load note", {
+                documentName,
+                message: error.message,
+            });
+        }
 
         const ydoc = new Y.Doc();
 
@@ -88,11 +91,14 @@ const server = new Server({
         try {
             const json = generateJSON(data.note.content, extensions as any);
 
-            console.log("Seeding from Supabase:", JSON.stringify(json, null, 2));
+            // console.log("Seeding from Supabase:", JSON.stringify(json, null, 2));
 
             return TiptapTransformer.toYdoc(json, "default", extensions as any);
         } catch (e) {
-            console.error("⚠️ fallback empty doc", e);
+            console.error("Failed to transform note", {
+                documentName,
+                error: e instanceof Error ? e.message : String(e),
+            });
             return document;
         }
     },
@@ -116,4 +122,6 @@ const server = new Server({
 });
 
 server.listen();
-console.log("Hocuspocus server running on ws://localhost:1234");
+console.info("Hocuspocus server started", {
+  port: 1234,
+});
