@@ -70,6 +70,29 @@ const extensions = [
 const server = new Server({
     port: 1234,
 
+    async onAuthenticate(data) {
+        const token = data.token;
+
+        if (!token) throw new Error("Missing token");
+
+        const {
+            data: { user },
+            error
+        } = await supabase.auth.getUser(token);
+
+        if (error || !user) throw new Error("Invalid token");
+
+        // console.log({
+        //     userid: user.id,
+        //     email: user.email,
+        // });
+
+        return {
+            userid: user.id,
+            email: user.email,
+        };
+    },
+
     async onLoadDocument({ documentName, document }) {
         const { data, error } = await supabase
             .from("notes")
