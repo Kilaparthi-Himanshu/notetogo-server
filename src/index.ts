@@ -67,8 +67,10 @@ const extensions = [
     CodeBlockLowlight
 ];
 
+const PORT = Number(process.env.PORT || 1234);
+
 const server = new Server({
-    port: 1234,
+    port: PORT,
 
     async onAuthenticate(data) {
         const token = data.token;
@@ -146,5 +148,5 @@ const server = new Server({
 
 server.listen();
 console.info("Hocuspocus server started", {
-  port: 1234,
+  port: PORT,
 });
